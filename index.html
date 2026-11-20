@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alpaca Bridge — Connessione API</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #121a30;
+      --card-2: #18223f;
+      --text: #eef2ff;
+      --muted: #9aa7cc;
+      --accent: #f5b700;
+      --accent-hover: #ffca28;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --border: rgba(255, 255, 255, 0.1);
+      --disabled-bg: #2b3142;
+      --disabled-text: #7c849b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: radial-gradient(circle at top, #182447 0%, var(--bg) 60%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 32px 16px 64px;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    .hero-card,
+    .panel-card,
+    .iframe-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    .panel-card,
+    .iframe-card {
+      margin-top: 20px;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(245, 183, 0, 0.12);
+      border: 1px solid rgba(245, 183, 0, 0.3);
+      padding: 6px 12px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: 1.85rem;
+      margin-bottom: 10px;
+    }
+
+    p.subtitle {
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 22px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      border-radius: 12px;
+      padding: 13px 22px;
+      font-size: 0.98rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.12s ease, background-color 0.2s ease, opacity 0.2s ease;
+    }
+
+    .btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #111625;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: var(--card-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      width: 100%;
+    }
+
+    .btn-secondary:hover {
+      background: #202d52;
+    }
+
+    /* Tasto Invio: grigio e inattivo finché non è tutto valido */
+    .btn-submit {
+      width: 100%;
+      margin-top: 18px;
+      background: var(--accent);
+      color: #111625;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .btn-submit:disabled {
+      background: var(--disabled-bg);
+      color: var(--disabled-text);
+      cursor: not-allowed;
+      opacity: 0.85;
+      box-shadow: none;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    label.field-label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 7px;
+      color: #dce3f9;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="url"] {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card-2);
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    input:focus {
+      outline: 2px solid rgba(245, 183, 0, 0.45);
+      border-color: var(--accent);
+    }
+
+    .consent-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 8px;
+    }
+
+    .consent-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+      cursor: pointer;
+    }
+
+    .consent-label input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .legal-note {
+      margin-top: 8px;
+      padding-left: 28px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .status {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .status.ok {
+      display: block;
+      background: rgba(34, 197, 94, 0.14);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      color: #86efac;
+    }
+
+    .status.err {
+      display: block;
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+
+    .iframe-wrapper {
+      margin-top: 16px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #070b14;
+    }
+
+    iframe {
+      width: 100%;
+      height: 540px;
+      border: none;
+      display: block;
+    }
+
+    .small-hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Schermata iniziale -->
+    <section class="hero-card">
+      <span class="badge">HTTPS Bridge • GitHub → PC Locale</span>
+      <h1>Gestione Credenziali Alpaca</h1>
+      <p class="subtitle">
+        Collega le tue chiavi API Alpaca tramite connessione HTTPS cifrata verso il tuo script Python locale.
+      </p>
+      <button id="btnCollegaAlpaca" type="button" class="btn btn-primary">
+        Collega Alpaca
+      </button>
+    </section>
+
+    <!-- Interfaccia inserimento API -->
+    <section id="pannelloApi" class="panel-card hidden">
+      <h2 style="margin-bottom: 8px;">Inserisci le credenziali Alpaca</h2>
+      <p class="subtitle" style="margin-bottom: 18px;">
+        Verranno salvate nel file JSON sul tuo PC con <strong>id</strong> e <strong>data_creazione</strong>.
+      </p>
+
+      <div class="field">
+        <label class="field-label" for="endpointUrl">Endpoint HTTPS Python locale</label>
+        <input
+          id="endpointUrl"
+          type="url"
+          value="https://127.0.0.1:8443/api/credenziali"
+          required
+        />
+      </div>
+
+      <form id="formApi" novalidate>
+        <div class="field">
+          <label class="field-label" for="apiKey">API Key</label>
+          <input
+            id="apiKey"
+            type="text"
+            placeholder="Es. PK..."
+            autocomplete="off"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="secretKey">Secret Key</label>
+          <input
+            id="secretKey"
+            type="password"
+            placeholder="Inserisci la Secret Key"
+            autocomplete="off"
+            required
+          />
+        </div>
+
+        <div class="consent-box">
+          <label class="consent-label" for="consensoCheckbox">
+            <input id="consensoCheckbox" type="checkbox" />
+            <span>
+              <strong>Acconsento al trattamento delle mie API private</strong> e dichiaro sotto la mia
+              responsabilità di essere il legittimo titolare delle credenziali fornite.
+            </span>
+          </label>
+          <div class="legal-note">
+            Dichiarazione di consenso esplicito e libero (art. 6 e art. 7 GDPR): autorizzi l'invio
+            tramite canale HTTPS verso il servizio locale indicato e il salvataggio nel file
+            <code>credenziali.json</code> per l'esecuzione delle operazioni API richieste.
+          </div>
+        </div>
+
+        <button id="btnInvio" type="submit" class="btn btn-submit" disabled>
+          Invio
+        </button>
+      </form>
+
+      <div id="statusBox" class="status" role="alert"></div>
+    </section>
+
+    <!-- Sezione tasto "Apri Alpaca" e iframe -->
+    <section class="iframe-card">
+      <button id="btnApriAlpaca" type="button" class="btn btn-secondary">
+        Apri Alpaca
+      </button>
+
+      <div id="iframeContainer" class="iframe-wrapper hidden">
+        <iframe
+          id="alpacaFrame"
+          data-src="https://app.alpaca.markets"
+          title="Alpaca Trading"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+        ></iframe>
+      </div>
+      <p class="small-hint">
+        Nota: alcuni portali finanziari impostano header di sicurezza (<code>X-Frame-Options</code> /
+        <code>frame-ancestors</code>) che possono impedire il caricamento diretto dentro un iframe.
+      </p>
+    </section>
+  </div>
+
+  <script>
+    const btnCollegaAlpaca = document.getElementById("btnCollegaAlpaca");
+    const pannelloApi = document.getElementById("pannelloApi");
+    const formApi = document.getElementById("formApi");
+    const endpointUrl = document.getElementById("endpointUrl");
+    const apiKeyInput = document.getElementById("apiKey");
+    const secretKeyInput = document.getElementById("secretKey");
+    const consensoCheckbox = document.getElementById("consensoCheckbox");
+    const btnInvio = document.getElementById("btnInvio");
+    const statusBox = document.getElementById("statusBox");
+
+    const btnApriAlpaca = document.getElementById("btnApriAlpaca");
+    const iframeContainer = document.getElementById("iframeContainer");
+    const alpacaFrame = document.getElementById("alpacaFrame");
+
+    function aggiornaStatoInvio() {
+      const hasEndpoint = endpointUrl.value.trim().length > 0;
+      const hasApiKey = apiKeyInput.value.trim().length > 0;
+      const hasSecretKey = secretKeyInput.value.trim().length > 0;
+      const hasConsent = consensoCheckbox.checked;
+
+      btnInvio.disabled = !(hasEndpoint && hasApiKey && hasSecretKey && hasConsent);
+    }
+
+    btnCollegaAlpaca.addEventListener("click", () => {
+      pannelloApi.classList.remove("hidden");
+      apiKeyInput.focus();
+    });
+
+    [endpointUrl, apiKeyInput, secretKeyInput, consensoCheckbox].forEach((el) => {
+      el.addEventListener("input", aggiornaStatoInvio);
+      el.addEventListener("change", aggiornaStatoInvio);
+    });
+
+    function mostraMessaggio(tipo, testo) {
+      statusBox.className = `status ${tipo}`;
+      statusBox.textContent = testo;
+    }
+
+    formApi.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      aggiornaStatoInvio();
+      if (btnInvio.disabled) return;
+
+      btnInvio.disabled = true;
+      btnInvio.textContent = "Invio in corso...";
+
+      const payload = {
+        api_key: apiKeyInput.value.trim(),
+        secret_key: secretKeyInput.value.trim(),
+        consenso_legale: true,
+        data_consenso: new Date().toISOString()
+      };
+
+      try {
+        const res = await fetch(endpointUrl.value.trim(), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || `Errore HTTP ${res.status}`);
+        }
+
+        mostraMessaggio(
+          "ok",
+          `Salvato con successo! ID #${data.record.id} — Data creazione: ${data.record.data_creazione}`
+        );
+
+        apiKeyInput.value = "";
+        secretKeyInput.value = "";
+        consensoCheckbox.checked = false;
+      } catch (err) {
+        mostraMessaggio(
+          "err",
+          `Impossibile comunicare con il server Python HTTPS: ${err.message}. Verifica che lo script sia attivo e che il certificato locale sia fidato.`
+        );
+      } finally {
+        btnInvio.textContent = "Invio";
+        aggiornaStatoInvio();
+      }
+    });
+
+    btnApriAlpaca.addEventListener("click", () => {
+      const isHidden = iframeContainer.classList.contains("hidden");
+      if (isHidden) {
+        if (!alpacaFrame.src) {
+          alpacaFrame.src = alpacaFrame.dataset.src;
+        }
+        iframeContainer.classList.remove("hidden");
+        btnApriAlpaca.textContent = "Nascondi Alpaca";
+      } else {
+        iframeContainer.classList.add("hidden");
+        btnApriAlpaca.textContent = "Apri Alpaca";
+      }
+    });
+  </script>
+</body>
+</html>
